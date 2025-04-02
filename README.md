@@ -29,7 +29,7 @@ python app.py
 
 ## Cách sử dụng
 
-1. Khi trang web mở, chatbot sẽ tự động hiện ra sau vài giây
+1. Khi trang web mở, bấm vào biểu tượng chatbot
 2. Nhập yêu cầu vẽ hình muốn tạo (ví dụ: "vẽ hình vuông cạnh 5cm")
 3. Chatbot sẽ hỏi thêm thông tin nếu cần và xác nhận khi đã đủ thông tin
 
