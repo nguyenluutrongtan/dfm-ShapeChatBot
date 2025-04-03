@@ -2,12 +2,14 @@ from flask import Flask, request, jsonify, render_template
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+import re
 
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 from chatbot import SHAPE_REQUIREMENTS, generate_system_prompt, call_gpt
+from shape_storage import shape_storage
 
 app = Flask(__name__, static_folder='static')
 
@@ -36,6 +38,8 @@ def chat():
         "role": "assistant", 
         "content": response
     })
+
+    shape_storage.process_and_save_shape(response)
     
     return jsonify({
         'message': response,
@@ -51,6 +55,18 @@ def new_chat():
     return jsonify({
         'message': welcome_message,
         'conversation': new_conversation
+    })
+
+@app.route('/api/shapes', methods=['GET'])
+def get_shapes():
+    return jsonify({
+        'shapes': shape_storage.get_all_shapes()
+    })
+
+@app.route('/api/shapes/<shape_name>', methods=['GET'])
+def get_shapes_by_name(shape_name):
+    return jsonify({
+        'shapes': shape_storage.get_shapes_by_name(shape_name)
     })
 
 if __name__ == '__main__':

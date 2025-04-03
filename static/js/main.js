@@ -15,6 +15,10 @@ document.addEventListener("DOMContentLoaded", function () {
   chatToggle.addEventListener("click", function () {
     chatbotWidget.classList.toggle("active");
     chatToggle.classList.toggle("hidden");
+
+    if (chatbotWidget.classList.contains("active")) {
+      loadSavedShapes();
+    }
   });
 
   // Close chat
@@ -181,4 +185,55 @@ document.addEventListener("DOMContentLoaded", function () {
       typingIndicator.remove();
     }
   }
+
+  // Load saved shapes
+  function loadSavedShapes() {
+    fetch("/api/shapes")
+      .then((response) => response.json())
+      .then((data) => {
+        const savedShapesContainer = document.getElementById("saved-shapes");
+        savedShapesContainer.innerHTML = "";
+
+        data.shapes.forEach((shape) => {
+          const shapeDiv = document.createElement("div");
+          shapeDiv.className =
+            "bg-white p-2 rounded border border-gray-200 text-sm";
+
+          const paramsText = Object.entries(shape.parameters)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ");
+
+          shapeDiv.innerHTML = `
+            <div class="flex justify-between items-center">
+              <span class="font-medium">${shape.shape_name}</span>
+              <span class="text-gray-500 text-xs">${new Date(
+                shape.timestamp
+              ).toLocaleString()}</span>
+            </div>
+            <div class="text-gray-600 mt-1">${paramsText}</div>
+          `;
+
+          savedShapesContainer.appendChild(shapeDiv);
+        });
+      })
+      .catch((error) => {
+        console.error("Error loading saved shapes:", error);
+      });
+  }
+
+  // Toggle saved shapes visibility
+  document
+    .getElementById("toggle-saved-shapes")
+    .addEventListener("click", function () {
+      const savedShapes = document.getElementById("saved-shapes");
+      const icon = this.querySelector("i");
+
+      savedShapes.classList.toggle("hidden");
+      icon.classList.toggle("fa-chevron-up");
+      icon.classList.toggle("fa-chevron-down");
+
+      if (!savedShapes.classList.contains("hidden")) {
+        loadSavedShapes();
+      }
+    });
 });
