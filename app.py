@@ -30,19 +30,57 @@ def chat():
     
     response = call_gpt(conversation)
     
+    if not isinstance(response, dict):
+        response = {
+            "message": "Sorry, I encountered an issue processing your request.",
+            "completed": False
+        }
+    
     conversation.append({
         "role": "assistant", 
         "content": json.dumps(response, ensure_ascii=False)
     })
     
     display_message = response.get('message', '')
-    if response.get('completed', False):
+    if response.get('completed', False) and response.get('shape'):
         shape = response.get('shape', '')
-        params_text = ', '.join([
-            f"{param}: {details['value']}{details.get('unit', '')}" 
-            for param, details in response.get('params', {}).items()
-        ])
-        display_message = f"Đã vẽ thành công hình {shape}, {params_text}"
+        params = response.get('params', {})
+        if shape and params:
+            params_text = ', '.join([
+                f"{param}: {details['value']}{details.get('unit', '')}" 
+                for param, details in params.items()
+            ])
+            
+            # Nhận dạng ngôn ngữ
+            def detect_vietnamese(text):
+                vietnamese_chars = set('àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ')
+                
+                text = text.lower()
+                
+                vietnamese_char_count = sum(1 for c in text if c in vietnamese_chars)
+                
+                common_vn_words = ['toi', 'ban', 've', 'hinh', 'vuong', 'tron', 'tam', 'giac', 'xin', 'chao', 'muon']
+                words = text.split()
+                vn_word_matches = sum(1 for word in words if word in common_vn_words)
+                
+                if vietnamese_char_count > 0:
+                    return True
+                elif vn_word_matches >= 1 and len(words) <= 10:
+                    return True
+                elif 'cm' in text and any(w in text for w in ['hinh', 've', 'canh']):
+                    return True
+                else:
+                    english_indicators = ['square', 'circle', 'triangle', 'rectangle', 'draw', 'side', 'length']
+                    if any(word in text.lower() for word in english_indicators):
+                        return False
+                    return True
+            
+            is_vietnamese = detect_vietnamese(user_message)
+            
+            if is_vietnamese:
+                display_message = f"Đã vẽ thành công hình {shape}, {params_text}"
+            else:
+                display_message = f"Successfully drawn {shape}, {params_text}"
     
     return jsonify({
         'message': display_message,
@@ -71,4 +109,5 @@ if __name__ == '__main__':
         with open('templates/index.html', 'w', encoding='utf-8') as f:
             f.write(content)
     
-    app.run(debug=True) 
+    port = int(os.getenv("PORT", 5000))
+    app.run(debug=True, port=port) 
