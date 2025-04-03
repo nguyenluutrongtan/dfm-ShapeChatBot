@@ -1,12 +1,10 @@
-from openai import OpenAI
 import os
 import json
 import re
 from dotenv import load_dotenv
+from gpt_connector import gpt_model
 
 load_dotenv()
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 SHAPE_REQUIREMENTS = {
     "vuông": ["cạnh"],
@@ -26,13 +24,13 @@ def generate_system_prompt():
     shape_list = ", ".join(SHAPE_REQUIREMENTS.keys())
     return f"""Bạn tên là DFM-Chatbot, là chatbot trợ giúp vẽ hình học. Hỗ trợ các hình: {shape_list}.
 NGÔN NGỮ:
-- Tiếng Việt
+- Tiếng Việt (Vietnamese)
 - Tiếng Anh (English)
-QUAN TRỌNG VỀ NGÔN NGỮ:
-- Phát hiện ngôn ngữ mà người dùng sử dụng (tiếng Việt hoặc tiếng Anh)
-- LUÔN trả lời bằng CÙNG ngôn ngữ mà người dùng đã sử dụng GẦN NHẤT
-- Khi người dùng chuyển sang tiếng Anh, TẤT CẢ các trả lời tiếp theo phải bằng tiếng Anh
-- Khi người dùng chuyển sang tiếng Việt, TẤT CẢ các trả lời tiếp theo phải bằng tiếng Việt
+Quy tắc Xử lý Ngôn ngữ (CỰC KỲ QUAN TRỌNG):
+*   Ngôn ngữ chính: Tiếng Việt (Vietnamese) và Tiếng Anh (English).
+*   Phát hiện Ngôn ngữ: Tự động xác định ngôn ngữ (Vietnamese hoặc English) của TỪNG tin nhắn người dùng gửi đến.
+*   Phản hồi nhất quán: LUÔN LUÔN trả lời bằng CHÍNH XÁC ngôn ngữ mà người dùng đã sử dụng trong tin nhắn GẦN NHẤT.
+*   Chuyển đổi ngôn ngữ: Nếu người dùng thay đổi ngôn ngữ (ví dụ: từ Vietnamese sang English), TẤT CẢ các phản hồi TIẾP THEO của bạn PHẢI bằng ngôn ngữ mới đó, cho đến khi người dùng lại thay đổi.
 
 NHIỆM VỤ:
 1. Xác định chính xác hình từ yêu cầu (phải dùng tên chuẩn trong danh sách)
@@ -62,54 +60,15 @@ FORMAT OUTPUT (JSON):
 
 LƯU Ý QUAN TRỌNG:
 - Khi người dùng hỏi về ngôn ngữ hoặc không yêu cầu vẽ hình cụ thể, chỉ trả về trường message với câu trả lời phù hợp và completed: false, không cần trả về shape và params.
-- Khi completed: true (chỉ khi vẽ hình thành công), bỏ qua trường message và dùng format cố định: 'Đã vẽ thành công hình X, tham_số1: giá_trị...'
+- Khi completed: true (chỉ khi vẽ hình thành công),trường message dùng format cố định: 'Đã vẽ thành công hình X, tham_số1: giá_trị...' hoặc 'Successfully drawn shape X, parameter1: value1...' theo ngôn ngữ mà người dùng đã sử dụng
 - Trả lời thân thiện nhưng ngắn gọn
 - Kiểm tra tính hợp lệ của tham số trước khi đánh dấu completed: true
 - Nếu người dùng cung cấp thông tin không rõ ràng, hãy đặt câu hỏi cụ thể
 - Khi người dùng không cung cấp đơn vị, tự động sử dụng đơn vị mặc định là "cm"
 """
 
-def format_params(params):
-    return ", ".join(
-        f"{name}: {data['value']}{data['unit'] if data.get('unit') else ''}"
-        for name, data in params.items()
-    )
-
 def call_gpt(messages):
-    try:
-        response = client.chat.completions.create(
-            model="o3-mini",
-            messages=messages,
-            #temperature=0.2,
-            max_completion_tokens=1024,
-            response_format={"type": "json_object"}
-        )
-        
-        content = response.choices[0].message.content
-        
-        try:
-            return json.loads(content)
-        except json.JSONDecodeError:
-            json_pattern = r'(\{.*\})'
-            match = re.search(json_pattern, content, re.DOTALL)
-            
-            if match:
-                try:
-                    return json.loads(match.group(0))
-                except json.JSONDecodeError:
-                    pass
-                    
-            print("Không thể trích xuất JSON từ phản hồi")
-            return {
-                "shape": None,
-                "params": {},
-                "message": "Xin lỗi, tôi gặp vấn đề khi xử lý yêu cầu. Hãy thử lại.",
-                "completed": False
-            }
-            
-    except Exception as e:
-        print(f"Lỗi khi gọi API: {e}")
-        return None
+    return gpt_model.call_model(messages)
 
 def shape_chatbot():
     messages = [{"role": "system", "content": generate_system_prompt()}]
@@ -129,11 +88,7 @@ def shape_chatbot():
             print("Chatbot: Xin lỗi, có lỗi xảy ra. Vui lòng thử lại.")
             continue
 
-        if response.get("completed", False):
-            print(f"Chatbot: Đã vẽ thành công hình {response['shape']}, {format_params(response['params'])}")
-            messages = [messages[0]]
-        else:
-            print(f"Chatbot: {response['message']}")
+        print(f"Chatbot: {response.get('message', '')}")
         
         messages.append({
             "role": "assistant",

@@ -42,45 +42,6 @@ def chat():
     })
     
     display_message = response.get('message', '')
-    if response.get('completed', False) and response.get('shape'):
-        shape = response.get('shape', '')
-        params = response.get('params', {})
-        if shape and params:
-            params_text = ', '.join([
-                f"{param}: {details['value']}{details.get('unit', '')}" 
-                for param, details in params.items()
-            ])
-            
-            # Nhận dạng ngôn ngữ
-            def detect_vietnamese(text):
-                vietnamese_chars = set('àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ')
-                
-                text = text.lower()
-                
-                vietnamese_char_count = sum(1 for c in text if c in vietnamese_chars)
-                
-                common_vn_words = ['toi', 'ban', 've', 'hinh', 'vuong', 'tron', 'tam', 'giac', 'xin', 'chao', 'muon']
-                words = text.split()
-                vn_word_matches = sum(1 for word in words if word in common_vn_words)
-                
-                if vietnamese_char_count > 0:
-                    return True
-                elif vn_word_matches >= 1 and len(words) <= 10:
-                    return True
-                elif 'cm' in text and any(w in text for w in ['hinh', 've', 'canh']):
-                    return True
-                else:
-                    english_indicators = ['square', 'circle', 'triangle', 'rectangle', 'draw', 'side', 'length']
-                    if any(word in text.lower() for word in english_indicators):
-                        return False
-                    return True
-            
-            is_vietnamese = detect_vietnamese(user_message)
-            
-            if is_vietnamese:
-                display_message = f"Đã vẽ thành công hình {shape}, {params_text}"
-            else:
-                display_message = f"Successfully drawn {shape}, {params_text}"
     
     return jsonify({
         'message': display_message,
