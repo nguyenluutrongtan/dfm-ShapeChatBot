@@ -1,13 +1,11 @@
 from openai import OpenAI
 import os
-import json
-import re
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class ChatGPTConnector:
-    def __init__(self, api_key=None, model="o3-mini"):
+    def __init__(self, api_key=None, model="gpt-4o-mini"):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         self.client = OpenAI(api_key=self.api_key)
         self.model = model
@@ -17,32 +15,10 @@ class ChatGPTConnector:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                #temperature=temperature,
-                max_completion_tokens=max_tokens,
-                response_format={"type": "json_object"}
+                max_completion_tokens=max_tokens
             )
             
-            content = response.choices[0].message.content
-            
-            try:
-                return json.loads(content)
-            except json.JSONDecodeError:
-                json_pattern = r'(\{.*\})'
-                match = re.search(json_pattern, content, re.DOTALL)
-                
-                if match:
-                    try:
-                        return json.loads(match.group(0))
-                    except json.JSONDecodeError:
-                        pass
-                        
-                print("Không thể trích xuất JSON từ phản hồi")
-                return {
-                    "shape": None,
-                    "params": {},
-                    "message": "Xin lỗi, tôi gặp vấn đề khi xử lý yêu cầu. Hãy thử lại.",
-                    "completed": False
-                }
+            return response.choices[0].message.content
                 
         except Exception as e:
             print(f"Lỗi khi gọi API: {e}")

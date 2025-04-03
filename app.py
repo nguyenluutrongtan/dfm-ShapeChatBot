@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, render_template
 import os
-import json
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -30,23 +29,17 @@ def chat():
     
     response = call_gpt(conversation)
     
-    if not isinstance(response, dict):
-        response = {
-            "message": "Sorry, I encountered an issue processing your request.",
-            "completed": False
-        }
+    if not response:
+        response = "Xin lỗi, tôi gặp vấn đề khi xử lý yêu cầu. Hãy thử lại."
     
     conversation.append({
         "role": "assistant", 
-        "content": json.dumps(response, ensure_ascii=False)
+        "content": response
     })
     
-    display_message = response.get('message', '')
-    
     return jsonify({
-        'message': display_message,
-        'conversation': conversation,
-        'completed': response.get('completed', False)
+        'message': response,
+        'conversation': conversation
     })
 
 @app.route('/api/new_chat', methods=['POST'])
@@ -57,8 +50,7 @@ def new_chat():
     
     return jsonify({
         'message': welcome_message,
-        'conversation': new_conversation,
-        'completed': False
+        'conversation': new_conversation
     })
 
 if __name__ == '__main__':

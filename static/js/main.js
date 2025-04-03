@@ -102,11 +102,6 @@ document.addEventListener("DOMContentLoaded", function () {
           // Add AI response
           addMessage(data.message, "ai");
 
-          // If conversation is completed, reset for a new conversation
-          if (data.completed) {
-            conversation = [];
-          }
-
           sendBtn.disabled = false;
         })
         .catch((error) => {
