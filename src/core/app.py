@@ -11,10 +11,10 @@ from src.models.shape_storage import shape_storage
 from src.api.model_connector import ModelConnector
 
 # Initialize with OpenAI as default
-model_provider = os.getenv("DEFAULT_MODEL_PROVIDER", "deepseek")
-model_name = os.getenv("DEEPSEEK_MODEL")
+model_provider = os.getenv("DEFAULT_MODEL_PROVIDER", "openai")
+model_name = os.getenv("OPENAI_MODEL")
 if not model_name:
-    raise ValueError("DEEPSEEK_MODEL environment variable is required")
+    raise ValueError("OPENAI_MODEL environment variable is required")
 model_connector = ModelConnector(provider=model_provider, model=model_name)
 
 # Get the absolute path to the project root
