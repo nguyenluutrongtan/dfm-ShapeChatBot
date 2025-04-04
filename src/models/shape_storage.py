@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 
 class ShapeStorage:
-    def __init__(self, storage_file="shapes.json"):
+    def __init__(self, storage_file="data/shapes.json"):
         self.storage_file = storage_file
         self.shapes = []
         self._load_shapes()

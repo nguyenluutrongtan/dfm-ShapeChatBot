@@ -8,8 +8,65 @@ document.addEventListener("DOMContentLoaded", function () {
   const userInput = document.getElementById("user-input");
   const chatMessages = document.getElementById("chat-messages");
   const sendBtn = document.getElementById("send-btn");
+  const modelSelector = document.getElementById("model-selector");
 
   let conversation = [];
+  let currentModel = { provider: "deepseek", model: "deepseek-chat" };
+
+  // Initialize model selector with the current model
+  fetch("/api/get_model")
+    .then((response) => response.json())
+    .then((data) => {
+      currentModel = data;
+      const selectValue = `${data.provider}:${data.model}`;
+
+      // Just set the value, don't add new options
+      if (modelSelector.querySelector(`option[value="${selectValue}"]`)) {
+        modelSelector.value = selectValue;
+      }
+      // If the model isn't in our predefined options, just use the first option
+    })
+    .catch((error) => {
+      console.error("Error getting current model:", error);
+    });
+
+  // Model selection change
+  modelSelector.addEventListener("change", function () {
+    const [provider, model] = this.value.split(":");
+
+    // Show typing indicator during model change
+    showTypingIndicator();
+
+    fetch("/api/change_model", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        provider: provider,
+        model: model,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        removeTypingIndicator();
+        if (data.success) {
+          currentModel = { provider: data.provider, model: data.model };
+          if (data.provider == "deepseek") {
+            addMessage(`Model changed to Deepseek (${data.model})`, "ai");
+          } else if (data.provider == "openai") {
+            addMessage(`Model changed to OpenAI (${data.model})`, "ai");
+          }
+        } else {
+          addMessage(`Failed to change model: ${data.message}`, "ai");
+        }
+      })
+      .catch((error) => {
+        console.error("Error changing model:", error);
+        removeTypingIndicator();
+        addMessage("Có lỗi khi thay đổi model. Vui lòng thử lại.", "ai");
+      });
+  });
 
   // Toggle chat widget
   chatToggle.addEventListener("click", function () {

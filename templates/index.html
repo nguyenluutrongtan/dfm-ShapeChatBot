@@ -57,6 +57,17 @@
           <span class="font-medium">DFM chatbot</span>
         </div>
         <div class="flex items-center space-x-3">
+          <div class="text-white text-sm mr-2">
+            <select
+              id="model-selector"
+              class="bg-indigo-700 text-white text-sm rounded px-2 py-1 outline-none"
+            >
+              <option value="deepseek:{{ deepseek_model }}" selected>
+                Deepseek
+              </option>
+              <option value="openai:{{ openai_model }}">OpenAI</option>
+            </select>
+          </div>
           <button
             class="text-white hover:text-indigo-200 transition"
             id="new-chat"

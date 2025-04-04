@@ -37,5 +37,9 @@ ENV/
 # Logs
 *.log
 
-# Local development
-.DS_Store 
+# Data
+data/shapes.json
+
+# OS
+.DS_Store
+Thumbs.db 

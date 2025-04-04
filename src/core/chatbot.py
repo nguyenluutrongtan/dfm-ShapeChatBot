@@ -1,43 +1,13 @@
 import os
 from dotenv import load_dotenv
-from gpt_connector import gpt_model
+from src.utils.constants import SHAPE_REQUIREMENTS
+from src.api.model_connector import ModelConnector
 
-load_dotenv()
+# Load environment variables from config directory
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config', '.env'))
 
-SHAPE_REQUIREMENTS = {
-    "vuông": ["cạnh"],
-    "square": ["side"],
-    
-    "chữ nhật": ["chiều rộng", "chiều dài"],
-    "rectangle": ["width", "length"],
-    
-    "tròn": ["bán kính"],
-    "circle": ["radius"],
-    
-    "tam giác": ["cạnh a", "cạnh b", "cạnh c"],
-    "triangle": ["side a", "side b", "side c"],
-    
-    "thoi": ["cạnh", "góc nhọn"],
-    "rhombus": ["side", "acute angle"],
-    
-    "elip": ["bán trục lớn", "bán trục nhỏ"],
-    "ellipse": ["semi-major axis", "semi-minor axis"],
-    
-    "thang": ["đáy lớn", "đáy nhỏ", "chiều cao", "cạnh bên"],
-    "trapezoid": ["major base", "minor base", "height", "side length"],
-    
-    "bình hành": ["cạnh a", "cạnh b", "góc nhọn"],
-    "parallelogram": ["side a", "side b", "acute angle"],
-    
-    "ngũ giác đều": ["cạnh"],
-    "pentagon": ["side"],
-    
-    "lục giác đều": ["cạnh"],
-    "hexagon": ["side"],
-    
-    "bát giác đều": ["cạnh"],
-    "octagon": ["side"]
-}
+# We will not create a model_connector here
+# The call_model function will use the model_connector from app.py
 
 def generate_system_prompt():
     shape_list = ", ".join(SHAPE_REQUIREMENTS.keys())
@@ -83,11 +53,15 @@ User: "Cạnh 10"
 Chatbot: "Bạn muốn vẽ hình gì với cạnh 10 cm?"
 """
 
-def call_gpt(messages):
-    return gpt_model.call_model(messages)
+def call_model(messages, model_connector):
+    """Call the AI model with the given messages using the provided model_connector"""
+    return model_connector.call_model(messages)
 
 def shape_chatbot():
     messages = [{"role": "system", "content": generate_system_prompt()}]
+    
+    # For CLI usage, create a local model connector
+    local_model_connector = ModelConnector(provider="deepseek")
     
     print("Chatbot: Xin chào! Bạn muốn vẽ hình gì?")
 
@@ -99,7 +73,7 @@ def shape_chatbot():
 
         messages.append({"role": "user", "content": user_input})
         
-        response = call_gpt(messages)
+        response = call_model(messages, local_model_connector)
         if not response:
             print("Chatbot: Xin lỗi, có lỗi xảy ra. Vui lòng thử lại.")
             continue
