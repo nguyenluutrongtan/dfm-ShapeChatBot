@@ -4,9 +4,6 @@
 # Python cache
 __pycache__/
 
-# Data
-data/shapes.json
-
 # Python
 *.py[cod]
 *$py.class

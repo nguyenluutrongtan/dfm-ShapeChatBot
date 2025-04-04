@@ -48,6 +48,13 @@ class ShapeStorage:
         self.shapes = []
         self.save_shapes()
 
+    def delete_shape(self, shape_index):
+        if 0 <= shape_index < len(self.shapes):
+            self.shapes.pop(shape_index)
+            self.save_shapes()
+            return True
+        return False
+
     def process_and_save_shape(self, response):
         if "Successfully drawn shape" in response:
             language = "en"

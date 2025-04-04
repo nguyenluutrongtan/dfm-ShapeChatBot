@@ -128,6 +128,13 @@ def get_shapes_by_name(shape_name):
         'shapes': shape_storage.get_shapes_by_name(shape_name)
     })
 
+@app.route('/api/shapes/<int:shape_index>', methods=['DELETE'])
+def delete_shape(shape_index):
+    success = shape_storage.delete_shape(shape_index)
+    return jsonify({
+        'success': success
+    })
+
 if __name__ == '__main__':
     # Ensure templates directory exists
     os.makedirs(templates_dir, exist_ok=True)

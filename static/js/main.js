@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const savedShapesContainer = document.getElementById("saved-shapes");
         savedShapesContainer.innerHTML = "";
 
-        data.shapes.forEach((shape) => {
+        data.shapes.forEach((shape, index) => {
           const shapeDiv = document.createElement("div");
           shapeDiv.className =
             "bg-white p-2 rounded border border-gray-200 text-sm";
@@ -263,14 +263,40 @@ document.addEventListener("DOMContentLoaded", function () {
           shapeDiv.innerHTML = `
             <div class="flex justify-between items-center">
               <span class="font-medium">${shape.shape_name}</span>
-              <span class="text-gray-500 text-xs">${new Date(
-                shape.timestamp
-              ).toLocaleString()}</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-gray-500 text-xs">${new Date(
+                  shape.timestamp
+                ).toLocaleString()}</span>
+                <button class="delete-shape text-red-500 hover:text-red-700" data-index="${index}">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
             </div>
             <div class="text-gray-600 mt-1">${paramsText}</div>
           `;
 
           savedShapesContainer.appendChild(shapeDiv);
+        });
+
+        // Add event listeners for delete buttons
+        document.querySelectorAll(".delete-shape").forEach((button) => {
+          button.addEventListener("click", function () {
+            const index = this.getAttribute("data-index");
+            if (confirm("Bạn có chắc chắn muốn xóa hình này?")) {
+              fetch(`/api/shapes/${index}`, {
+                method: "DELETE",
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    loadSavedShapes(); // Reload the shapes list
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error deleting shape:", error);
+                });
+            }
+          });
         });
       })
       .catch((error) => {
