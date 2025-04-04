@@ -1,0 +1,12 @@
+[
+  {
+    "shape_name": "tam giác",
+    "parameters": {
+      "cạnh a": "3 cm",
+      " cạnh b": "4 cm",
+      " cạnh c": "5 cm"
+    },
+    "language": "vi",
+    "timestamp": "2025-04-04T16:58:10.333375"
+  }
+]
