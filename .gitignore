@@ -1,8 +1,13 @@
 # Environment variables
 .env
 
-# Python
+# Python cache
 __pycache__/
+
+# Data
+data/shapes.json
+
+# Python
 *.py[cod]
 *$py.class
 *.so
@@ -36,9 +41,6 @@ ENV/
 
 # Logs
 *.log
-
-# Data
-data/shapes.json
 
 # OS
 .DS_Store
