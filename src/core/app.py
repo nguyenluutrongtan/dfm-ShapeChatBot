@@ -70,6 +70,7 @@ def change_model():
     
     if provider == 'openai':
         model = data.get('model', os.getenv("OPENAI_MODEL"))
+        model_name_env = os.getenv("OPENAI_MODEL_NAME", f"OpenAI ({model})")
         if not model:
             return jsonify({
                 'success': False,
@@ -77,6 +78,7 @@ def change_model():
             }), 400
     elif provider == 'deepseek':
         model = data.get('model', os.getenv("DEEPSEEK_MODEL"))
+        model_name_env = os.getenv("DEEPSEEK_MODEL_NAME", f"Deepseek ({model})")
         if not model:
             return jsonify({
                 'success': False,
@@ -95,21 +97,44 @@ def change_model():
     return jsonify({
         'success': True,
         'provider': provider,
-        'model': model
+        'model': model,
+        'model_name': model_name_env
     })
 
 @app.route('/api/get_model', methods=['GET'])
 def get_model():
+    provider = model_provider
+    model = model_name
+    
+    if provider == 'openai':
+        model_name_env = os.getenv("OPENAI_MODEL_NAME", f"OpenAI ({model})")
+    elif provider == 'deepseek':
+        model_name_env = os.getenv("DEEPSEEK_MODEL_NAME", f"Deepseek ({model})")
+    else:
+        model_name_env = f"{provider.capitalize()} ({model})"
+        
     return jsonify({
-        'provider': model_provider,
-        'model': model_name
+        'provider': provider,
+        'model': model,
+        'model_name': model_name_env
     })
 
 @app.route('/api/new_chat', methods=['POST'])
 def new_chat():
     new_conversation = [{"role": "system", "content": generate_system_prompt()}]
     
-    welcome_message = "Xin chào! Tôi có thể giúp bạn vẽ các hình học. Hãy cho tôi biết bạn muốn vẽ hình nào?"
+    # Get current model name
+    provider = model_provider
+    model = model_name
+    
+    if provider == 'openai':
+        model_name_env = os.getenv("OPENAI_MODEL_NAME", f"OpenAI ({model})")
+    elif provider == 'deepseek':
+        model_name_env = os.getenv("DEEPSEEK_MODEL_NAME", f"Deepseek ({model})")
+    else:
+        model_name_env = f"{provider.capitalize()} ({model})"
+    
+    welcome_message = f"Xin chào! Tôi là {model_name_env}. Tôi có thể giúp bạn vẽ các hình học. Hãy cho tôi biết bạn muốn vẽ hình nào?"
     
     return jsonify({
         'message': welcome_message,

@@ -25,6 +25,14 @@ document.addEventListener("DOMContentLoaded", function () {
         modelSelector.value = selectValue;
       }
       // If the model isn't in our predefined options, just use the first option
+
+      // Display current model in chat
+      if (chatMessages.children.length === 0) {
+        addMessage(
+          `Using ${data.model_name || `${data.provider} (${data.model})`}`,
+          "ai"
+        );
+      }
     })
     .catch((error) => {
       console.error("Error getting current model:", error);
@@ -53,9 +61,17 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.success) {
           currentModel = { provider: data.provider, model: data.model };
           if (data.provider == "deepseek") {
-            addMessage(`Model changed to Deepseek (${data.model})`, "ai");
+            addMessage(
+              `Model changed to ${
+                data.model_name || `Deepseek (${data.model})`
+              }`,
+              "ai"
+            );
           } else if (data.provider == "openai") {
-            addMessage(`Model changed to OpenAI (${data.model})`, "ai");
+            addMessage(
+              `Model changed to ${data.model_name || `OpenAI (${data.model})`}`,
+              "ai"
+            );
           }
         } else {
           addMessage(`Failed to change model: ${data.message}`, "ai");
