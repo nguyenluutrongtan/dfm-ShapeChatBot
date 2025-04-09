@@ -11,8 +11,11 @@ class ShapeStorage:
         self.shape_pattern = re.compile(r"(?:Successfully drawn shape|Đã vẽ thành công hình)\s+([a-zA-Z0-9 áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ]+)(?:,\s*(.*))?")
         self.sides_pattern_vi = re.compile(r"các cạnh:\s*([\d.]+ (?:cm|mm|m|inch|ft)(?:,\s*[\d.]+ (?:cm|mm|m|inch|ft))*)")
         self.sides_pattern_en = re.compile(r"sides:\s*([\d.]+ (?:cm|mm|m|inch|ft)(?:,\s*[\d.]+ (?:cm|mm|m|inch|ft))*)")
-        self.param_pattern = re.compile(r"([a-zA-Z0-9 áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ]+):\s*([\d.]+(?:\s*[a-zA-Z]+)?)")
-
+        self.param_pattern = re.compile(
+            r"(?:^|,\s*)"
+            r"([a-zA-Z0-9 áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ]+):\s*"
+            r"([\d.]+(?:\s*[a-zA-Z]+)?)"
+        )
     def _load_shapes(self):
         if os.path.exists(self.storage_file):
             try:
