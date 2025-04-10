@@ -276,6 +276,13 @@ document.addEventListener("DOMContentLoaded", function () {
             .map(([key, value]) => `${key}: ${value}`)
             .join(", ");
 
+          // Create a simplified JSON representation with only shape_name and parameters
+          const simplifiedJson = {
+            shape_name: shape.shape_name,
+            parameters: shape.parameters,
+          };
+          const jsonString = JSON.stringify(simplifiedJson);
+
           shapeDiv.innerHTML = `
             <div class="flex justify-between items-center">
               <span class="font-medium">${shape.shape_name}</span>
@@ -289,6 +296,9 @@ document.addEventListener("DOMContentLoaded", function () {
               </div>
             </div>
             <div class="text-gray-600 mt-1">${paramsText}</div>
+            <div class="text-gray-400 text-xs mt-1 truncate">
+              JSON: ${jsonString}
+            </div>
           `;
 
           savedShapesContainer.appendChild(shapeDiv);
